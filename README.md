@@ -1,4 +1,4 @@
-# Gemini All-in-One Platform
+# Gemcall All-in-One Platform
 
 A communication platform combining Google Gemini AI with JioCX Voice API for browser-based AI conversations and real phone calls.
 
