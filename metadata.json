@@ -1,0 +1,9 @@
+{
+  "name": "Gemini All-in-One Platform",
+  "description": "A comprehensive application showcasing various Gemini API features, including real-time voice conversations, video and image generation, chatbot functionality, text-to-speech, and grounded search capabilities.",
+  "requestFramePermissions": [
+    "microphone",
+    "geolocation",
+    "camera"
+  ]
+}
