@@ -77,9 +77,9 @@ jobs:
         VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
         VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
       with:
-        vercel-token: ${{ secrets.VERCEL_TOKEN }}
-        vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-        vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+        vercel-token: ${{ env.VERCEL_TOKEN }}
+        vercel-org-id: ${{ env.VERCEL_ORG_ID }}
+        vercel-project-id: ${{ env.VERCEL_PROJECT_ID }}
         vercel-args: '--prod'
     
   # Job 3: Deploy to Vercel (Preview)
@@ -88,10 +88,7 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
-    env:
-      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
     
     steps:
     - name: 📥 Checkout code
@@ -100,6 +97,10 @@ jobs:
     - name: 🔍 Deploy Preview to Vercel
       uses: amondnet/vercel-action@v25
       id: vercel-deploy
+      env:
+        VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+        VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
       with:
         vercel-token: ${{ env.VERCEL_TOKEN }}
         vercel-org-id: ${{ env.VERCEL_ORG_ID }}
