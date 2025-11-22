@@ -8,9 +8,9 @@ on:
   workflow_dispatch:
 
 env:
-  VERCEL_TOKEN: ${{ secrets['VERCEL_TOKEN'] }}
-  VERCEL_ORG_ID: ${{ secrets['VERCEL_ORG_ID'] }}
-  VERCEL_PROJECT_ID: ${{ secrets['VERCEL_PROJECT_ID'] }}
+  VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN || 'local_token' }}
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID || 'local_org_id' }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID || 'local_project_id' }}
 
 jobs:
   # Job 1: Lint and Test
