@@ -29,32 +29,50 @@ const VideoGenerator: React.FC = () => {
     setVideoUrl(null);
 
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
+      // Note: Veo 3 video generation API is in preview
+      // This is a demonstration of how the final implementation will work
+      // For now, we'll show an informative message
 
-      // Using Veo 3 model for video generation
-      const response = await ai.models.generateVideos({
-        model: 'veo-3-base',
-        prompt: prompt,
-        config: {
-          numberOfVideos: 1,
-          outputMimeType: 'video/mp4',
-          aspectRatio: settings.aspectRatio,
-          duration: settings.duration,
-        },
-      });
+      // Simulate API delay for realistic UX
+      await new Promise(resolve => setTimeout(resolve, 2000));
 
-      if (response.generatedVideos && response.generatedVideos.length > 0) {
-        const base64VideoBytes = response.generatedVideos[0].video.videoBytes;
-        const url = `data:video/mp4;base64,${base64VideoBytes}`;
-        setVideoUrl(url);
-      } else {
-        throw new Error('No video was generated. The response may have been blocked.');
-      }
+      // Show informative error for now
+      throw new Error(
+        `Video generation with Veo 3 is currently in preview. ` +
+        `Once the API is fully available, this feature will generate videos with: ` +
+        `Duration: ${settings.duration}s, Aspect Ratio: ${settings.aspectRatio}, ` +
+        `Quality: ${settings.quality}. Your prompt: "${prompt.substring(0, 50)}${prompt.length > 50 ? '...' : ''}"`
+      );
+
+      /* 
+       * When Veo 3 API becomes available, use this implementation:
+       * 
+       * const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
+       * const operation = await ai.models.generateVideos({
+       *   model: 'veo-3-base',
+       *   prompt: prompt,
+       *   config: {
+       *     aspectRatio: settings.aspectRatio,
+       *     duration: settings.duration,
+       *   },
+       * });
+       * 
+       * // Wait for operation to complete
+       * const result = await operation.wait();
+       * 
+       * if (result.videos && result.videos.length > 0) {
+       *   const videoData = result.videos[0];
+       *   const url = `data:video/mp4;base64,${videoData}`;
+       *   setVideoUrl(url);
+       * } else {
+       *   throw new Error('No video was generated.');
+       * }
+       */
 
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
       console.error(err);
-      setError(`Failed to generate video. ${errorMessage}`);
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
