@@ -7,6 +7,11 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+env:
+  VERCEL_TOKEN: ${{ secrets['VERCEL_TOKEN'] }}
+  VERCEL_ORG_ID: ${{ secrets['VERCEL_ORG_ID'] }}
+  VERCEL_PROJECT_ID: ${{ secrets['VERCEL_PROJECT_ID'] }}
+
 jobs:
   # Job 1: Lint and Test
   test:
@@ -72,10 +77,6 @@ jobs:
     
     - name: 🚀 Deploy to Vercel
       uses: amondnet/vercel-action@v25
-      env:
-        VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-        VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
       with:
         vercel-token: ${{ env.VERCEL_TOKEN }}
         vercel-org-id: ${{ env.VERCEL_ORG_ID }}
@@ -97,10 +98,6 @@ jobs:
     - name: 🔍 Deploy Preview to Vercel
       uses: amondnet/vercel-action@v25
       id: vercel-deploy
-      env:
-        VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-        VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
       with:
         vercel-token: ${{ env.VERCEL_TOKEN }}
         vercel-org-id: ${{ env.VERCEL_ORG_ID }}
