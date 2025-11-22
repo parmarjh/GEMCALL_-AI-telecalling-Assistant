@@ -1,6 +1,6 @@
 
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { FEATURES, Feature } from './constants';
 import HomePage from './components/HomePage';
 import LiveCall from './components/LiveCall';
@@ -19,20 +19,52 @@ interface User {
   email: string;
 }
 
+const AUTH_STORAGE_KEY = 'gemcall_auth_user';
+
 const App: React.FC = () => {
   const [features, setFeatures] = useState<Feature[]>(FEATURES);
   const [activeFeature, setActiveFeature] = useState<Feature>(features[0]);
   const [user, setUser] = useState<User | null>(null);
+  const [isLoadingAuth, setIsLoadingAuth] = useState(true);
 
   const dragItem = useRef<number | null>(null);
   const dragOverItem = useRef<number | null>(null);
 
+  // Load user from localStorage on app initialization
+  useEffect(() => {
+    try {
+      const savedUser = localStorage.getItem(AUTH_STORAGE_KEY);
+      if (savedUser) {
+        const parsedUser = JSON.parse(savedUser);
+        setUser(parsedUser);
+      }
+    } catch (err) {
+      console.error('Failed to load user from localStorage', err);
+      // Clear corrupted data
+      localStorage.removeItem(AUTH_STORAGE_KEY);
+    } finally {
+      setIsLoadingAuth(false);
+    }
+  }, []);
+
   const handleLogin = (loggedInUser: User) => {
     setUser(loggedInUser);
+    // Persist user to localStorage
+    try {
+      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(loggedInUser));
+    } catch (err) {
+      console.error('Failed to save user to localStorage', err);
+    }
   };
 
   const handleLogout = () => {
     setUser(null);
+    // Remove user from localStorage
+    try {
+      localStorage.removeItem(AUTH_STORAGE_KEY);
+    } catch (err) {
+      console.error('Failed to remove user from localStorage', err);
+    }
     // Set back to the default feature on logout
     setActiveFeature(features[0]);
   };
@@ -46,6 +78,18 @@ const App: React.FC = () => {
     dragOverItem.current = null;
     setFeatures(featuresCopy);
   };
+
+  // Show loading spinner while checking authentication
+  if (isLoadingAuth) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
+        <div className="text-center">
+          <div className="inline-block w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+          <p className="text-gray-400">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!user) {
     return <Auth onLogin={handleLogin} />;
@@ -98,8 +142,8 @@ const App: React.FC = () => {
               key={feature.id}
               onClick={() => setActiveFeature(feature)}
               className={`p-3 rounded-lg transition-all duration-200 cursor-grab ${activeFeature.id === feature.id
-                  ? 'bg-indigo-600 text-white scale-110'
-                  : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                ? 'bg-indigo-600 text-white scale-110'
+                : 'text-gray-400 hover:bg-gray-800 hover:text-white'
                 }
               ${dragItem.current === index ? 'opacity-50' : ''}
               `}
