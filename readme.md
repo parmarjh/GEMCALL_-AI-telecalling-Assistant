@@ -7,6 +7,14 @@ A communication platform combining Google Gemini AI with JioCX Voice API for bro
 [![React](https://img.shields.io/badge/React-19.2.0-61DAFB?logo=react)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue?logo=typescript)](https://www.typescriptlang.org/)
 
+## Demo
+
+[![Watch Demo](https://img.shields.io/badge/YouTube-Watch%20Demo-red?style=for-the-badge&logo=youtube)](https://youtu.be/OZ8NhFtcOIg?si=ca3Ubgjv4oGjP6xi)
+
+<a href="https://youtu.be/OZ8NhFtcOIg?si=ca3Ubgjv4oGjP6xi">
+  <img src="https://img.youtube.com/vi/OZ8NhFtcOIg/maxresdefault.jpg" alt="Demo Video" width="600">
+</a>
+
 ## Overview
 
 This platform offers two communication modes:
