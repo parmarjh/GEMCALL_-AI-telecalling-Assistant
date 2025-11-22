@@ -2,6 +2,7 @@
 
 import React, { useState, useRef } from 'react';
 import { FEATURES, Feature } from './constants';
+import HomePage from './components/HomePage';
 import LiveCall from './components/LiveCall';
 import Chatbot from './components/Chatbot';
 import ImageGenerator from './components/ImageGenerator';
@@ -35,7 +36,7 @@ const App: React.FC = () => {
     // Set back to the default feature on logout
     setActiveFeature(features[0]);
   };
-  
+
   const handleFeatureDragSort = () => {
     if (dragItem.current === null || dragOverItem.current === null) return;
     const featuresCopy = [...features];
@@ -52,6 +53,11 @@ const App: React.FC = () => {
 
   const renderActiveFeature = () => {
     switch (activeFeature.id) {
+      case 'home':
+        return <HomePage onNavigate={(featureId) => {
+          const feature = features.find(f => f.id === featureId);
+          if (feature) setActiveFeature(feature);
+        }} />;
       case 'live_call':
         return <LiveCall />;
       case 'chatbot':
@@ -71,7 +77,10 @@ const App: React.FC = () => {
       case 'knowledge_base':
         return <KnowledgeBase />;
       default:
-        return <LiveCall />;
+        return <HomePage onNavigate={(featureId) => {
+          const feature = features.find(f => f.id === featureId);
+          if (feature) setActiveFeature(feature);
+        }} />;
     }
   };
 
@@ -79,7 +88,7 @@ const App: React.FC = () => {
     <div className="flex h-screen bg-gray-900 text-white font-sans">
       <nav className="w-20 bg-gray-950 p-4 flex flex-col items-center space-y-6 border-r border-gray-800">
         <div className="text-indigo-400">
-           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8">
             <path d="M12.378 1.602a.75.75 0 0 0-.756 0L3 6.632l9 5.25 9-5.25-8.622-5.03ZM21.75 7.93l-9 5.25v9.32l9-5.25V7.93ZM2.25 7.93v9.32l9 5.25v-9.32l-9-5.25Z" />
           </svg>
         </div>
@@ -88,11 +97,10 @@ const App: React.FC = () => {
             <button
               key={feature.id}
               onClick={() => setActiveFeature(feature)}
-              className={`p-3 rounded-lg transition-all duration-200 cursor-grab ${
-                activeFeature.id === feature.id
+              className={`p-3 rounded-lg transition-all duration-200 cursor-grab ${activeFeature.id === feature.id
                   ? 'bg-indigo-600 text-white scale-110'
                   : 'text-gray-400 hover:bg-gray-800 hover:text-white'
-              }
+                }
               ${dragItem.current === index ? 'opacity-50' : ''}
               `}
               title={feature.title}
@@ -106,16 +114,16 @@ const App: React.FC = () => {
             </button>
           ))}
         </div>
-         <div className="flex flex-col items-center space-y-4">
-           <div className="w-full border-t border-gray-700 my-2"></div>
-           <p className="text-xs text-gray-400 w-full text-center truncate">{user.name}</p>
-            <button
-                onClick={handleLogout}
-                className="p-3 rounded-lg transition-colors duration-200 text-gray-400 hover:bg-red-800/50 hover:text-white"
-                title="Logout"
-            >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6"><path fillRule="evenodd" d="M7.5 3.75A1.5 1.5 0 0 0 6 5.25v13.5a1.5 1.5 0 0 0 1.5 1.5h6a1.5 1.5 0 0 0 1.5-1.5V15a.75.75 0 0 1 1.5 0v3.75a3 3 0 0 1-3 3h-6a3 3 0 0 1-3-3V5.25a3 3 0 0 1 3-3h6a3 3 0 0 1 3 3V9A.75.75 0 0 1 15 9V5.25a1.5 1.5 0 0 0-1.5-1.5h-6Zm10.72 4.72a.75.75 0 0 1 1.06 0l3 3a.75.75 0 0 1 0 1.06l-3 3a.75.75 0 1 1-1.06-1.06l1.72-1.72H9a.75.75 0 0 1 0-1.5h10.94l-1.72-1.72a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" /></svg>
-            </button>
+        <div className="flex flex-col items-center space-y-4">
+          <div className="w-full border-t border-gray-700 my-2"></div>
+          <p className="text-xs text-gray-400 w-full text-center truncate">{user.name}</p>
+          <button
+            onClick={handleLogout}
+            className="p-3 rounded-lg transition-colors duration-200 text-gray-400 hover:bg-red-800/50 hover:text-white"
+            title="Logout"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6"><path fillRule="evenodd" d="M7.5 3.75A1.5 1.5 0 0 0 6 5.25v13.5a1.5 1.5 0 0 0 1.5 1.5h6a1.5 1.5 0 0 0 1.5-1.5V15a.75.75 0 0 1 1.5 0v3.75a3 3 0 0 1-3 3h-6a3 3 0 0 1-3-3V5.25a3 3 0 0 1 3-3h6a3 3 0 0 1 3 3V9A.75.75 0 0 1 15 9V5.25a1.5 1.5 0 0 0-1.5-1.5h-6Zm10.72 4.72a.75.75 0 0 1 1.06 0l3 3a.75.75 0 0 1 0 1.06l-3 3a.75.75 0 1 1-1.06-1.06l1.72-1.72H9a.75.75 0 0 1 0-1.5h10.94l-1.72-1.72a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" /></svg>
+          </button>
         </div>
       </nav>
       <main className="flex-1 flex flex-col overflow-hidden">
