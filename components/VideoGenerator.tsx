@@ -20,6 +20,120 @@ const VideoGenerator: React.FC = () => {
     quality: 'standard',
   });
 
+  const generateDemoVideo = async (): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      try {
+        // Parse aspect ratio to get dimensions
+        const [widthRatio, heightRatio] = settings.aspectRatio.split(':').map(Number);
+        const baseWidth = 1280;
+        const width = baseWidth;
+        const height = Math.round((baseWidth / widthRatio) * heightRatio);
+
+        // Calculate actual duration (limit demo to 10 seconds max for performance)
+        const actualDuration = Math.min(settings.duration, 10);
+        const fps = 30;
+        const totalFrames = actualDuration * fps;
+
+        // Create canvas
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) throw new Error('Could not get canvas context');
+
+        // Create MediaRecorder
+        const stream = canvas.captureStream(fps);
+        const mediaRecorder = new MediaRecorder(stream, {
+          mimeType: 'video/webm;codecs=vp9',
+          videoBitsPerSecond: 2500000,
+        });
+
+        const chunks: Blob[] = [];
+        mediaRecorder.ondataavailable = (e) => {
+          if (e.data.size > 0) chunks.push(e.data);
+        };
+
+        mediaRecorder.onstop = () => {
+          const blob = new Blob(chunks, { type: 'video/webm' });
+          const url = URL.createObjectURL(blob);
+          resolve(url);
+        };
+
+        mediaRecorder.onerror = (e) => {
+          reject(new Error('MediaRecorder error'));
+        };
+
+        // Start recording
+        mediaRecorder.start();
+
+        let frame = 0;
+        const renderFrame = () => {
+          if (frame >= totalFrames) {
+            mediaRecorder.stop();
+            return;
+          }
+
+          // Animated gradient background
+          const progress = frame / totalFrames;
+          const hue1 = (progress * 360) % 360;
+          const hue2 = (hue1 + 60) % 360;
+
+          const gradient = ctx.createLinearGradient(0, 0, width, height);
+          gradient.addColorStop(0, `hsl(${hue1}, 70%, 50%)`);
+          gradient.addColorStop(1, `hsl(${hue2}, 70%, 30%)`);
+          ctx.fillStyle = gradient;
+          ctx.fillRect(0, 0, width, height);
+
+          // Animated circles
+          for (let i = 0; i < 5; i++) {
+            const angle = (progress * Math.PI * 2) + (i * Math.PI * 2 / 5);
+            const x = width / 2 + Math.cos(angle) * (width / 4);
+            const y = height / 2 + Math.sin(angle) * (height / 4);
+            const radius = 30 + Math.sin(progress * Math.PI * 4 + i) * 20;
+
+            ctx.fillStyle = `rgba(255, 255, 255, ${0.3 - progress * 0.1})`;
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, Math.PI * 2);
+            ctx.fill();
+          }
+
+          // Pulsing center circle
+          const pulseScale = 1 + Math.sin(progress * Math.PI * 8) * 0.2;
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+          ctx.beginPath();
+          ctx.arc(width / 2, height / 2, 80 * pulseScale, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Text overlay
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+          ctx.fillRect(0, height - 120, width, 120);
+
+          // Prompt text
+          ctx.fillStyle = '#ffffff';
+          ctx.font = `bold ${Math.round(width / 40)}px Arial`;
+          ctx.textAlign = 'center';
+          ctx.fillText(prompt.substring(0, 80), width / 2, height - 70);
+
+          // Demo watermark
+          ctx.font = `${Math.round(width / 60)}px Arial`;
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+          ctx.fillText('Demo Video - Veo 3 Preview', width / 2, height - 30);
+
+          // Progress bar
+          ctx.fillStyle = 'rgba(99, 102, 241, 0.8)';
+          ctx.fillRect(20, height - 15, (width - 40) * progress, 5);
+
+          frame++;
+          requestAnimationFrame(renderFrame);
+        };
+
+        renderFrame();
+      } catch (err) {
+        reject(err);
+      }
+    });
+  };
+
   const handleGenerateVideo = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!prompt.trim() || isLoading) return;
@@ -29,23 +143,13 @@ const VideoGenerator: React.FC = () => {
     setVideoUrl(null);
 
     try {
-      // Note: Veo 3 video generation API is in preview
-      // This is a demonstration of how the final implementation will work
-      // For now, we'll show an informative message
-
-      // Simulate API delay for realistic UX
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      // Show informative error for now
-      throw new Error(
-        `Video generation with Veo 3 is currently in preview. ` +
-        `Once the API is fully available, this feature will generate videos with: ` +
-        `Duration: ${settings.duration}s, Aspect Ratio: ${settings.aspectRatio}, ` +
-        `Quality: ${settings.quality}. Your prompt: "${prompt.substring(0, 50)}${prompt.length > 50 ? '...' : ''}"`
-      );
+      // Generate demo video using Canvas API
+      // This creates an animated video until Veo 3 API becomes available
+      const videoUrl = await generateDemoVideo();
+      setVideoUrl(videoUrl);
 
       /* 
-       * When Veo 3 API becomes available, use this implementation:
+       * When Veo 3 API becomes available, replace above with:
        * 
        * const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
        * const operation = await ai.models.generateVideos({
@@ -56,23 +160,15 @@ const VideoGenerator: React.FC = () => {
        *     duration: settings.duration,
        *   },
        * });
-       * 
-       * // Wait for operation to complete
        * const result = await operation.wait();
-       * 
-       * if (result.videos && result.videos.length > 0) {
-       *   const videoData = result.videos[0];
-       *   const url = `data:video/mp4;base64,${videoData}`;
-       *   setVideoUrl(url);
-       * } else {
-       *   throw new Error('No video was generated.');
-       * }
+       * const videoUrl = `data:video/mp4;base64,${result.videos[0]}`;
+       * setVideoUrl(videoUrl);
        */
 
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
       console.error(err);
-      setError(errorMessage);
+      setError(`Failed to generate video. ${errorMessage}`);
     } finally {
       setIsLoading(false);
     }
